@@ -89,6 +89,9 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .callout{border-left:3px solid var(--blush);padding:4px 0 4px 12px;font-size:15px;margin:0}
 pre#summary{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:14px;font-family:var(--body);font-size:14px;margin:0;max-height:300px;overflow:auto}
 .ok{color:var(--accent);font-size:14px;margin:0;min-height:1.4em}
+.sendState{margin:0;padding:12px 14px;border-radius:10px;background:var(--accent-soft);font-size:15px}
+.sendState.fail{background:var(--bg);border:1px solid var(--warn);color:var(--warn)}
+.sendState:empty{display:none}
 .row{display:flex;flex-wrap:wrap;gap:10px}
 .row>button{flex:1 1 180px}
 footer{font-size:12px;color:var(--muted);line-height:1.7}
@@ -102,7 +105,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     <div class="eyebrow">療程前 · 健康問卷</div>
     <h1 id="h1">先了解您的身體，再為您安排療程</h1>
     <p class="lead" id="lead">回答幾個簡單的問題，我們會依您的狀況安排營養針內容，也會給您日常飲食與作息的建議。</p>
-    <div class="meta" id="meta"><span>預估 5 分鐘</span><span>多數題目點選即可</span><span>填答不會上傳</span></div>
+    <div class="meta" id="meta"><span>預估 5 分鐘</span><span>多數題目點選即可</span><span>資料加密傳送給 YG LAB</span></div>
     <div class="mode" role="radiogroup" aria-label="填寫類型">
       <label><input type="radio" name="mode" value="new" id="mode_new" checked><span>第一次來</span></label>
       <label><input type="radio" name="mode" value="re" id="mode_re"><span>回診追蹤</span></label>
@@ -252,6 +255,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
         <span><b>用途</b>　評估您的身體狀況、安排與追蹤療程，以及療程中的緊急聯絡</span>
         <span><b>資料內容</b>　姓名、聯絡方式、緊急聯絡人、健康與用藥資料、療程前後分數</span>
         <span><b>保存期間</b>　療程期間及結束後 3 年；您可隨時要求提前刪除</span>
+        <span><b>保存方式</b>　送出後經加密連線傳送至 YG LAB 的 Google 雲端試算表，只有療程團隊可以查看</span>
         <span><b>使用地區</b>　台灣</span>
         <span><b>您的權利</b>　可以查詢、閱覽、索取複本、更正、停止使用或刪除您的資料，直接用 LINE 告訴我們即可</span>
         <span><b>不提供的影響</b>　您可以不填，但我們將無法為您評估與安排療程</span>
@@ -271,7 +275,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     <div class="submit">
       <p class="err" id="errMsg" hidden></p>
       <button type="submit" class="primary" id="submitBtn">看我的建議</button>
-      <p class="note">送出後內容只會顯示在這支手機上，請按「複製」傳給我們。</p>
+      <p class="note">按下送出後，資料會直接傳給我們。</p>
     </div>
   </form>
 
@@ -280,9 +284,10 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     <p class="callout" id="callout" hidden></p>
     <ol class="tips" id="tips"></ol>
     <p class="note" id="resNote">以上是一般生活建議，不能取代您的醫師或營養師的個人建議。營養針內容我們看過您的回答後會再和您確認，實際療程由醫師評估後決定。</p>
-    <div class="q"><div class="t">請把以下內容傳給我們</div>
+    <p class="sendState" id="sendState" aria-live="polite"></p>
+    <div class="q"><div class="t" id="copyTitle">您的填答內容</div>
       <pre id="summary"></pre>
-      <button type="button" class="primary" id="copyBtn">複製內容，貼到 LINE</button>
+      <button type="button" class="ghost" id="copyBtn">複製內容，貼到 LINE</button>
       <p class="ok" id="copyMsg" aria-live="polite"></p>
       <div class="row">
         <button type="button" class="ghost" id="editBtn">回去修改</button>
@@ -292,12 +297,12 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     </div>
   </section>
 
-  <footer>本問卷用於療程前了解您的身體狀況，不能取代醫師診斷。填寫內容不會上傳，只會在您按下複製後由您自己傳送。頁面字型從 Google Fonts 載入，不包含您的填答內容。同意書版本 20261028。</footer>
+  <footer>本問卷用於療程前了解您的身體狀況，不能取代醫師診斷。按下送出後，填答會經加密連線傳送至 YG LAB 保存；填到一半的內容只暫存在您的手機。頁面字型從 Google Fonts 載入，不包含您的填答內容。同意書版本 20261029。</footer>
 </div>
 
 <script>
 (function(){
-  const f=document.getElementById('f'),KEY='intake-draft-v3',CONSENT_VER='20261028',$=id=>document.getElementById(id);
+  const f=document.getElementById('f'),KEY='intake-draft-v3',CONSENT_VER='20261029',$=id=>document.getElementById(id);
   const SCALES=[['sFatigue','疲累、沒精神'],['sSleep','睡不好'],['sSkin','皮膚狀況'],['sGut','腸胃不適'],['sStress','壓力、緊繃'],['sMain','您最在意的那件事']];
 
   const sc=$('scales');
@@ -534,8 +539,43 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     return L.join('\n');
   }
 
+  // ===== 自動建檔：傳到 YG LAB 的 Google 試算表（Apps Script 網頁應用程式） =====
+  const ENDPOINT='https://script.google.com/macros/s/AKfycbzqeimNDP0SMNb6-YiiXjqgyQ6eHTTs6lw1xQ-e3weZ1I96LBOvoRlD-J6CyXaNb0TJ/exec',TOKEN='yglab-intake-v1';
+  function record(){
+    const j=a=>a.join('、');
+    if(mode()==='re')return {_mode:'re','同意版本':CONSENT_VER,'稱呼':txt('name'),'手機/LINE':txt('phone'),'第幾次':txt('visitNo'),'上次療程日期':txt('lastDate'),'最在意':txt('mainItem'),
+      '疲累':one('sFatigue'),'睡不好':one('sSleep'),'皮膚':one('sSkin'),'腸胃':one('sGut'),'壓力':one('sStress'),'最在意分數':one('sMain'),
+      '變化':j(vals('better')),'變化說明':isHidden($('betterNote'))?'':txt('betterNote'),'不適':j(vals('adverse')),'不適說明':isHidden($('adverseNote'))?'':txt('adverseNote'),
+      '作息建議':one('followed'),'新變化':one('changed'),'新變化說明':one('changed')==='有'?txt('changedNote'):'','近一週發燒感冒':one('fever'),'懷孕哺乳':one('preg'),'兩週內手術':one('surgery'),
+      '補充':txt('extra'),'同意繼續使用':one('reAgree'),'注意事項':j(flags())};
+    return {_mode:'new','同意版本':CONSENT_VER,'稱呼':txt('name'),'手機/LINE':txt('phone'),'性別':one('sex'),'出生年':txt('birth'),'身高':txt('height'),'體重':txt('weight'),'BMI':bmi(),
+      '緊急聯絡人':txt('ecName'),'緊急聯絡電話':txt('ecPhone'),'困擾':j(vals('concern')),'困擾多久':one('duration'),'最在意':txt('mainItem'),
+      '疲累':one('sFatigue'),'睡不好':one('sSleep'),'皮膚':one('sSkin'),'腸胃':one('sGut'),'壓力':one('sStress'),'最在意分數':one('sMain'),
+      '近一週發燒感冒':one('fever'),'慢性病':j(vals('disease')),'G6PD':one('g6pd'),'用藥':j(vals('med')),'藥名':txt('medNote'),'保健品':j(vals('supp')),'保健品說明':txt('suppNote'),
+      '過敏':one('allergy'),'過敏原':one('allergy')!=='沒有'?txt('allergyNote'):'','含硫藥物過敏':one('sulfa'),'點滴經驗':j(vals('iv')),
+      '懷孕哺乳':one('sex')==='女'?one('preg'):'','月經':one('sex')==='女'?one('period'):'','兩週內手術':one('surgery'),
+      '幾點睡':one('bed'),'睡幾小時':one('sleepH'),'睡眠狀況':j(vals('sleepType')),'咖啡茶':one('caffeine'),'外食':one('eatout'),'宵夜':one('snack'),'甜食':one('sugar'),
+      '喝酒':one('alcohol'),'抽菸':one('smoke'),'喝水':one('water'),'排便':one('bowel'),'運動':one('exercise'),'健檢報告':one('report'),'補充':txt('extra'),
+      '同意資料使用':one('agree'),'同意案例':one('caseOk')||'未同意','初判分型':[...new Set(vals('concern').map(x=>TYPE[x]))].join('、')+'（待報告確認）','注意事項':j(flags())};
+  }
+  function showSend(state){
+    const el=$('sendState');el.classList.toggle('fail',state==='fail');
+    el.textContent=state==='sending'?'正在傳送給我們…':state==='ok'?'✓ 已經傳給我們了，我們會盡快和您聯絡。':'這次沒有傳送成功。請按下方「複製內容」，用 LINE 傳給我們。';
+    $('copyTitle').textContent=state==='ok'?'您的填答內容（已送出，可留存參考）':'請把以下內容傳給我們';
+    $('copyBtn').className=state==='fail'?'primary':'ghost';
+  }
+  async function send(){
+    if(!ENDPOINT){showSend('fail');return}
+    showSend('sending');
+    try{
+      const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),15000);
+      const r=await fetch(ENDPOINT,{method:'POST',body:JSON.stringify({...record(),_k:TOKEN}),signal:ctl.signal});
+      clearTimeout(tm);const j=await r.json();showSend(j.ok?'ok':'fail');
+    }catch(_){showSend('fail')}
+  }
+
   const result=$('result'),err=$('errMsg');
-  function clearResult(){$('tips').replaceChildren();$('summary').textContent='';$('callout').textContent='';$('callout').hidden=true;$('copyMsg').textContent=''}
+  function clearResult(){$('sendState').textContent='';$('tips').replaceChildren();$('summary').textContent='';$('callout').textContent='';$('callout').hidden=true;$('copyMsg').textContent=''}
   f.addEventListener('submit',e=>{
     e.preventDefault();
     const bad=validate();
@@ -550,7 +590,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
       li.querySelector('.n').textContent=i+1;li.querySelector('b').textContent=h;li.querySelector('p').textContent=p;ol.append(li)});
     const c=re?'':callout();$('callout').textContent=c;$('callout').hidden=!c;
     $('summary').textContent=re?summaryRe():summaryNew();
-    f.hidden=true;result.hidden=false;
+    f.hidden=true;result.hidden=false;send();
     result.scrollIntoView({behavior:'smooth',block:'start'});
   });
   $('editBtn').addEventListener('click',()=>{result.hidden=true;f.hidden=false;f.scrollIntoView({block:'start'})});
