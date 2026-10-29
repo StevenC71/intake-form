@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>療程前健康問卷</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：單欄窄版問卷，像一張安靜的初診卡；段落是白卡，選項是可點的膠囊，分數用 0–10 刻度列 */
+:root{
+  --bg:#F4F6F4; --card:#FFFFFF; --ink:#22302D; --muted:#6B7A76;
+  --line:#DCE3E0; --accent:#4F7A6E; --accent-soft:#E3EEEA; --blush:#B9786C; --warn:#A5553F;
+  --display:"Noto Serif TC","Songti TC",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151B1A; --card:#1D2523; --ink:#E6ECEA; --muted:#98A6A2;
+  --line:#2F3A37; --accent:#8BBBAE; --accent-soft:#25332F; --blush:#D99B8F; --warn:#E39A84; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151B1A; --card:#1D2523; --ink:#E6ECEA; --muted:#98A6A2;
+  --line:#2F3A37; --accent:#8BBBAE; --accent-soft:#25332F; --blush:#D99B8F; --warn:#E39A84; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-direction:column;gap:12px;padding-top:8px}
+.eyebrow{font-size:13px;letter-spacing:.18em;color:var(--accent)}
+h1{font-family:var(--display);font-weight:600;font-size:30px;line-height:1.35;margin:0;text-wrap:balance}
+.lead{color:var(--muted);margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted)}
+.meta span::before{content:"·";margin-right:6px;color:var(--accent)}
+.mode{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;padding:4px;background:var(--card);gap:4px}
+.mode label{position:relative;text-align:center}
+.mode input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.mode span{display:block;padding:10px 8px;border-radius:9px;font-weight:500;color:var(--muted)}
+.mode input:checked+span{background:var(--accent);color:var(--card)}
+.mode input:focus-visible+span{outline:2px solid var(--ink);outline-offset:1px}
+form{display:flex;flex-direction:column;gap:20px}
+section.part{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;gap:24px}
+.part h2{font-family:var(--display);font-weight:500;font-size:20px;margin:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.part h2 small{font-family:var(--body);font-size:13px;color:var(--muted);font-weight:400}
+.q{display:flex;flex-direction:column;gap:10px;border:0;margin:0;padding:0;min-width:0}
+.q legend,.q .t{font-weight:500;padding:0;margin-bottom:2px}
+.req{color:var(--blush);font-size:13px;margin-left:6px;font-weight:400}
+.hint{font-size:13px;color:var(--muted);margin:-6px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-size:15px;line-height:1.45;background:var(--card);transition:background .15s,border-color .15s}
+.opt input:checked+span{background:var(--accent-soft);border-color:var(--accent)}
+.opt input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.opt input:disabled+span{opacity:.4}
+.scales{display:flex;flex-direction:column;gap:18px}
+.scale-row{display:flex;flex-direction:column;gap:6px;border:0;margin:0;padding:0;min-width:0}
+.scale-row legend{font-size:15px;padding:0;margin-bottom:4px}
+.opts.scale{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
+.opts.scale .opt span{display:block;text-align:center;padding:7px 0;border-radius:8px;font-size:14px;font-variant-numeric:tabular-nums}
+.scale-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+input[type=text],input[type=tel],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:84px;resize:vertical}
+input[type=text]:focus,input[type=tel]:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid2>*{min-width:0}
+@media (max-width:480px){.grid2{grid-template-columns:1fr}}
+.err{color:var(--warn);font-size:14px;margin:0}
+.q.bad legend,.q.bad .t,.scale-row.bad legend,.q.bad .check>span{color:var(--warn)}
+.q.bad input[type=text],.q.bad input[type=tel]{border-color:var(--warn)}
+.consent{display:flex;flex-direction:column;gap:14px}
+.notice{font-size:14px;color:var(--muted);margin:0;padding:12px 14px;background:var(--bg);border-radius:10px;display:flex;flex-direction:column;gap:4px}
+.notice b{color:var(--ink);font-weight:500}
+.check{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:15px;cursor:pointer}
+.check input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--accent)}
+.submit{display:flex;flex-direction:column;gap:10px}
+button{font:inherit;font-weight:500;border-radius:12px;padding:14px 18px;cursor:pointer;border:1px solid var(--accent)}
+button.primary{background:var(--accent);color:var(--card)}
+button.ghost{background:transparent;color:var(--accent)}
+button.quiet{background:transparent;color:var(--muted);border-color:var(--line);font-weight:400;font-size:14px;padding:10px 14px}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.note{font-size:13px;color:var(--muted);margin:0}
+#result{display:flex;flex-direction:column;gap:22px}
+.tips{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+.tips li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start}
+.tips .n{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:var(--display);font-weight:600}
+.tips b{display:block;font-weight:500}
+.tips p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.callout{border-left:3px solid var(--blush);padding:4px 0 4px 12px;font-size:15px;margin:0}
+pre#summary{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:14px;font-family:var(--body);font-size:14px;margin:0;max-height:300px;overflow:auto}
+.ok{color:var(--accent);font-size:14px;margin:0;min-height:1.4em}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row>button{flex:1 1 180px}
+footer{font-size:12px;color:var(--muted);line-height:1.7}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">療程前 · 健康問卷</div>
+    <h1 id="h1">先了解您的身體，再為您安排療程</h1>
+    <p class="lead" id="lead">回答幾個簡單的問題，我們會依您的狀況安排營養針內容，也會給您日常飲食與作息的建議。</p>
+    <div class="meta" id="meta"><span>預估 5 分鐘</span><span>多數題目點選即可</span><span>填答不會上傳</span></div>
+    <div class="mode" role="radiogroup" aria-label="填寫類型">
+      <label><input type="radio" name="mode" value="new" id="mode_new" checked><span>第一次來</span></label>
+      <label><input type="radio" name="mode" value="re" id="mode_re"><span>回診追蹤</span></label>
+    </div>
+    <p class="note" id="storeWarn" hidden>這支手機無法暫存填到一半的內容，請一次填完再送出。</p>
+  </header>
+
+  <form id="f" novalidate>
+    <!-- 基本資料 -->
+    <section class="part">
+      <h2>基本資料</h2>
+      <div class="grid2">
+        <div class="q" data-req><label class="t" for="name">怎麼稱呼您<span class="req">必填</span></label><input type="text" id="name" name="name" autocomplete="name"></div>
+        <div class="q" data-req><label class="t" for="phone">手機或 LINE ID<span class="req">必填</span></label><input type="tel" id="phone" name="phone" autocomplete="tel"></div>
+      </div>
+      <fieldset class="q" data-req="sex" data-mode="new"><legend>性別<span class="req">必填</span></legend>
+        <div class="opts" data-name="sex" data-type="radio" data-items="女|男"></div></fieldset>
+      <div class="grid2" data-mode="new">
+        <div class="q" data-req data-check="year"><label class="t" for="birth">出生年（西元）<span class="req">必填</span></label><input type="text" id="birth" name="birth" inputmode="numeric" placeholder="例：1985"></div>
+        <div class="q"><span class="t">身高／體重</span>
+          <div class="grid2" style="gap:8px;grid-template-columns:1fr 1fr">
+            <input type="text" id="height" name="height" inputmode="decimal" placeholder="身高 cm" aria-label="身高">
+            <input type="text" id="weight" name="weight" inputmode="decimal" placeholder="體重 kg" aria-label="體重">
+          </div></div>
+      </div>
+      <div class="q" data-req data-mode="new"><span class="t">緊急聯絡人<span class="req">必填</span></span>
+        <div class="grid2" style="gap:8px">
+          <input type="text" id="ecName" name="ecName" placeholder="姓名與關係，例：王小明／先生" aria-label="緊急聯絡人姓名">
+          <input type="tel" id="ecPhone" name="ecPhone" placeholder="電話" aria-label="緊急聯絡人電話">
+        </div>
+        <p class="hint">療程中萬一身體不適，才會聯絡這位。</p></div>
+      <div class="grid2" data-mode="re">
+        <div class="q" data-req data-check="int"><label class="t" for="visitNo">這是第幾次療程？<span class="req">必填</span></label><input type="text" id="visitNo" name="visitNo" inputmode="numeric" placeholder="例：3"></div>
+        <div class="q"><label class="t" for="lastDate">上次療程日期</label><input type="text" id="lastDate" name="lastDate" placeholder="例：10/14"></div>
+      </div>
+    </section>
+
+    <!-- 主訴 -->
+    <section class="part" data-mode="new">
+      <h2>想改善什麼 <small>最多選 3 項</small></h2>
+      <fieldset class="q" data-req="concern"><legend>最近最困擾您的是？<span class="req">必填</span></legend>
+        <div class="opts" data-name="concern" data-type="checkbox" data-max="3" data-items="累但睡不著、容易緊繃|睡不好（難睡或容易醒）|腦袋不清楚、容易沒電|整體抗老保養|皮膚暗沉、敏感、長痘|想讓膚色更亮|常熬夜或應酬喝酒|體重卡關、瘦不下來|腸胃不好、便秘脹氣|常感冒、容易過敏|手腳麻、刺痛、常頭痛|手腳冰冷|掉髮、髮量變少|經期不順或更年期不適"></div></fieldset>
+      <fieldset class="q"><legend>這個狀況多久了？</legend>
+        <div class="opts" data-name="duration" data-type="radio" data-items="一個月內|一到六個月|半年到一年|一年以上"></div></fieldset>
+    </section>
+
+    <!-- 分數：初診與回診共用 -->
+    <section class="part">
+      <h2>現在的感覺打個分數 <small>0 = 完全沒困擾，10 = 非常困擾</small></h2>
+      <div class="q" data-req><label class="t" for="mainItem" id="mainItemLabel">您最在意的那件事是什麼？<span class="req">必填</span></label>
+        <input type="text" id="mainItem" name="mainItem" placeholder="用幾個字寫下來，例：半夜容易醒">
+        <p class="hint" id="mainItemHint">之後回診會請您用同一件事再打一次分數，方便比較。</p></div>
+      <div class="scales" id="scales"></div>
+    </section>
+
+    <!-- 回診專屬 -->
+    <section class="part" data-mode="re">
+      <h2>上次療程後</h2>
+      <fieldset class="q" data-req="better"><legend>和療程前比，有哪些變化？<span class="req">必填</span></legend>
+        <div class="opts" data-name="better" data-type="checkbox" data-none="還沒什麼感覺" data-items="精神變好|睡得比較好|皮膚變好|腸胃比較順|比較不容易累|有些地方變差了|其他|還沒什麼感覺"></div>
+        <div class="q" data-req id="betterNoteQ" hidden><input type="text" id="betterNote" name="betterNote" placeholder="哪裡變差或其他變化，請寫一下" aria-label="變化說明"></div></fieldset>
+      <fieldset class="q" data-req="adverse"><legend>打完後有不舒服嗎？<span class="req">必填</span></legend>
+        <div class="opts" data-name="adverse" data-type="checkbox" data-none="沒有" data-items="針孔瘀青|頭暈|噁心|起疹子或發癢|特別疲倦|其他|沒有"></div>
+        <div class="q" data-req id="adverseNoteQ" hidden><input type="text" id="adverseNote" name="adverseNote" placeholder="大概什麼時候、持續多久" aria-label="不適說明"></div></fieldset>
+      <fieldset class="q"><legend>上次的作息建議做到了嗎？</legend>
+        <div class="opts" data-name="followed" data-type="radio" data-items="大多做到|做到一些|還沒開始"></div></fieldset>
+      <fieldset class="q" data-req="changed"><legend>最近有新的藥、新的保健品或新的身體狀況嗎？<span class="req">必填</span></legend>
+        <div class="opts" data-name="changed" data-type="radio" data-items="沒有|有"></div>
+        <div class="q" data-req id="changedNoteQ" hidden><input type="text" id="changedNote" name="changedNote" placeholder="請寫一下是什麼" aria-label="新變化說明"></div></fieldset>
+    </section>
+
+    <!-- 安全確認 -->
+    <section class="part">
+      <h2>安全確認 <small>讓療程更安心</small></h2>
+      <fieldset class="q" data-req="fever"><legend>最近一週有發燒、感冒或身體發炎嗎？<span class="req">必填</span></legend>
+        <div class="opts" data-name="fever" data-type="radio" data-items="沒有|有"></div>
+        <p class="hint">有的話我們會先和您確認，必要時改期。</p></fieldset>
+      <fieldset class="q" data-req="disease" data-mode="new"><legend>是否有以下狀況？<span class="req">必填</span></legend>
+        <div class="opts" data-name="disease" data-type="checkbox" data-none="都沒有" data-items="高血壓|糖尿病|心臟疾病|腎臟疾病或洗腎|腎結石|肝炎或脂肪肝|甲狀腺疾病|自體免疫疾病|癲癇|重症肌無力|癌症治療中|曾經罹癌|都沒有"></div></fieldset>
+      <fieldset class="q" data-req="g6pd" data-mode="new"><legend>有沒有蠶豆症（G6PD 缺乏）？<span class="req">必填</span></legend>
+        <div class="opts" data-name="g6pd" data-type="radio" data-items="沒有|有|不確定"></div>
+        <p class="hint">不確定沒關係，我們會再幫您確認。</p></fieldset>
+      <fieldset class="q" data-req="med" data-mode="new"><legend>目前固定吃的藥？<span class="req">必填</span></legend>
+        <div class="opts" data-name="med" data-type="checkbox" data-none="沒有吃藥" data-items="抗凝血藥或阿斯匹靈|帕金森氏症用藥|降血壓藥|降血糖藥或胰島素|利尿劑|類固醇|免疫抑制劑|化療或標靶藥物|甲狀腺藥|安眠或抗焦慮藥|避孕藥或荷爾蒙|其他|沒有吃藥"></div>
+        <input type="text" id="medNote" name="medNote" placeholder="藥名（知道的話寫一下，不確定可以拍藥袋給我們）"></fieldset>
+      <fieldset class="q" data-req="supp" data-mode="new"><legend>目前固定吃的保健品？<span class="req">必填</span></legend>
+        <div class="opts" data-name="supp" data-type="checkbox" data-none="沒有吃" data-items="魚油|銀杏|薑黃|B 群|維生素 C|維生素 D|硒|鋅|鐵劑|鈣或鎂|益生菌|中藥|其他|沒有吃"></div>
+        <input type="text" id="suppNote" name="suppNote" placeholder="品名或其他（可拍瓶身給我們）"></fieldset>
+      <fieldset class="q" data-req="allergy" data-mode="new"><legend>有沒有過敏？（藥物、食物、打針）<span class="req">必填</span></legend>
+        <div class="opts" data-name="allergy" data-type="radio" data-items="沒有|有，輕微（起疹、發癢）|曾經嚴重過敏（休克、喘不過氣）"></div>
+        <div class="q" data-req id="allergyNoteQ" hidden><input type="text" id="allergyNote" name="allergyNote" placeholder="對什麼過敏（藥名或食物）" aria-label="過敏原"></div></fieldset>
+      <fieldset class="q" data-req="sulfa" data-mode="new"><legend>對磺胺類（含硫）藥物過敏嗎？<span class="req">必填</span></legend>
+        <div class="opts" data-name="sulfa" data-type="radio" data-items="沒有|有|不確定"></div></fieldset>
+      <fieldset class="q" data-req="iv" data-mode="new"><legend>以前打點滴或抽血的經驗？<span class="req">必填</span></legend>
+        <div class="opts" data-name="iv" data-type="checkbox" data-none="都很順" data-items="沒打過點滴|容易暈針或暈血|血管不好找|打完曾經不舒服|都很順"></div></fieldset>
+      <fieldset class="q" data-female data-req="preg"><legend>目前是否懷孕、哺乳或準備懷孕？<span class="req">必填</span></legend>
+        <div class="opts" data-name="preg" data-type="radio" data-items="都不是|懷孕中|哺乳中|準備懷孕"></div></fieldset>
+      <fieldset class="q" data-female data-mode="new"><legend>月經狀況</legend>
+        <div class="opts" data-name="period" data-type="radio" data-items="規律|不規律|量很多或血塊多|更年期|已停經"></div></fieldset>
+      <fieldset class="q" data-req="surgery"><legend>兩週內有手術或拔牙的安排嗎？<span class="req">必填</span></legend>
+        <div class="opts" data-name="surgery" data-type="radio" data-items="沒有|有"></div></fieldset>
+    </section>
+
+    <!-- 作息飲食 -->
+    <section class="part" data-mode="new">
+      <h2>作息與飲食</h2>
+      <fieldset class="q" data-req="bed"><legend>通常幾點睡？<span class="req">必填</span></legend>
+        <div class="opts" data-name="bed" data-type="radio" data-items="11 點前|11 點到 12 點|12 點到 1 點|1 點以後"></div></fieldset>
+      <fieldset class="q"><legend>一晚大約睡幾小時？</legend>
+        <div class="opts" data-name="sleepH" data-type="radio" data-items="不到 5 小時|5 到 6 小時|7 小時以上"></div></fieldset>
+      <fieldset class="q"><legend>睡眠狀況</legend>
+        <div class="opts" data-name="sleepType" data-type="checkbox" data-none="睡得很好" data-items="躺很久才睡著|半夜容易醒|很早醒來睡不回去|睡很久還是累|睡得很好"></div></fieldset>
+      <fieldset class="q"><legend>咖啡或茶</legend>
+        <div class="opts" data-name="caffeine" data-type="radio" data-items="不喝|上午 1 杯|一天 2 杯以上或下午也喝"></div></fieldset>
+      <fieldset class="q"><legend>三餐大多</legend>
+        <div class="opts" data-name="eatout" data-type="radio" data-items="自己煮|一半外食|幾乎都外食"></div></fieldset>
+      <fieldset class="q"><legend>晚上 9 點後吃東西（宵夜）</legend>
+        <div class="opts" data-name="snack" data-type="radio" data-items="幾乎不會|一週 1 到 2 次|一週 3 次以上"></div></fieldset>
+      <fieldset class="q"><legend>含糖飲料或甜點</legend>
+        <div class="opts" data-name="sugar" data-type="radio" data-items="很少|一週幾次|幾乎每天"></div></fieldset>
+      <fieldset class="q"><legend>喝酒</legend>
+        <div class="opts" data-name="alcohol" data-type="radio" data-items="不喝|偶爾聚會|一週 2 次以上"></div></fieldset>
+      <fieldset class="q"><legend>抽菸</legend>
+        <div class="opts" data-name="smoke" data-type="radio" data-items="不抽|已經戒了|有在抽"></div></fieldset>
+      <fieldset class="q"><legend>一天喝多少水？</legend>
+        <div class="opts" data-name="water" data-type="radio" data-items="不到 1000 mL|1000 到 2000 mL|2000 mL 以上"></div></fieldset>
+      <fieldset class="q"><legend>排便</legend>
+        <div class="opts" data-name="bowel" data-type="radio" data-items="每天順暢|兩三天一次|常便秘|常拉肚子或脹氣"></div></fieldset>
+      <fieldset class="q"><legend>運動（流汗 20 分鐘以上）</legend>
+        <div class="opts" data-name="exercise" data-type="radio" data-items="幾乎沒有|一週 1 到 2 次|一週 3 次以上"></div></fieldset>
+    </section>
+
+    <!-- 報告補充 -->
+    <section class="part">
+      <h2>健檢報告與補充</h2>
+      <fieldset class="q" data-mode="new"><legend>一年內有做過健檢或抽血嗎？</legend>
+        <div class="opts" data-name="report" data-type="radio" data-items="有，會拍照傳給你們|有，但找不到|沒有"></div>
+        <p class="hint">有報告的話請直接用 LINE 傳照片。</p></fieldset>
+      <div class="q"><label class="t" for="extra">還有什麼想讓我們知道的？</label><textarea id="extra" name="extra" placeholder="例如：特別在意的地方、想問的問題"></textarea></div>
+    </section>
+
+    <!-- 同意（初診） -->
+    <section class="part" data-mode="new">
+      <h2>個人資料告知與同意</h2>
+      <div class="notice">
+        <span><b>蒐集者</b>　YG LAB</span>
+        <span><b>用途</b>　評估您的身體狀況、安排與追蹤療程，以及療程中的緊急聯絡</span>
+        <span><b>資料內容</b>　姓名、聯絡方式、緊急聯絡人、健康與用藥資料、療程前後分數</span>
+        <span><b>保存期間</b>　療程期間及結束後 3 年；您可隨時要求提前刪除</span>
+        <span><b>使用地區</b>　台灣</span>
+        <span><b>您的權利</b>　可以查詢、閱覽、索取複本、更正、停止使用或刪除您的資料，直接用 LINE 告訴我們即可</span>
+        <span><b>不提供的影響</b>　您可以不填，但我們將無法為您評估與安排療程</span>
+      </div>
+      <div class="consent">
+        <div class="q" data-req="agree"><label class="check"><input type="checkbox" name="agree" value="同意" id="agree"><span>我已閱讀上方說明，同意 YG LAB 為上述用途蒐集與使用我的健康資料。<span class="req">必填</span></span></label></div>
+        <div class="q"><label class="check"><input type="checkbox" name="caseOk" value="同意" id="caseOk"><span>我同意 YG LAB 在去除姓名、聯絡方式、生日、照片及其他可以認出我的資訊後，只用年齡層、性別與療程前後分數，作為療程案例參考。（可不勾，不影響療程；之後也可以隨時撤回）</span></label></div>
+      </div>
+    </section>
+
+    <!-- 同意（回診） -->
+    <section class="part" data-mode="re">
+      <h2>個人資料同意</h2>
+      <div class="q" data-req="reAgree"><label class="check"><input type="checkbox" name="reAgree" value="同意" id="reAgree"><span>我同意 YG LAB 依初診時說明的用途，繼續使用我這次填寫的資料。<span class="req">必填</span></span></label></div>
+    </section>
+
+    <div class="submit">
+      <p class="err" id="errMsg" hidden></p>
+      <button type="submit" class="primary" id="submitBtn">看我的建議</button>
+      <p class="note">送出後內容只會顯示在這支手機上，請按「複製」傳給我們。</p>
+    </div>
+  </form>
+
+  <section class="part" id="result" hidden>
+    <h2 id="resTitle">給您的日常建議</h2>
+    <p class="callout" id="callout" hidden></p>
+    <ol class="tips" id="tips"></ol>
+    <p class="note" id="resNote">以上是一般生活建議，不能取代您的醫師或營養師的個人建議。營養針內容我們看過您的回答後會再和您確認，實際療程由醫師評估後決定。</p>
+    <div class="q"><div class="t">請把以下內容傳給我們</div>
+      <pre id="summary"></pre>
+      <button type="button" class="primary" id="copyBtn">複製內容，貼到 LINE</button>
+      <p class="ok" id="copyMsg" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" class="ghost" id="editBtn">回去修改</button>
+        <button type="button" class="quiet" id="clearBtn">傳完了，清除這支手機上的資料</button>
+      </div>
+      <p class="note">清除只會刪掉這支手機上的內容，已經傳到 LINE 的訊息不受影響。</p>
+    </div>
+  </section>
+
+  <footer>本問卷用於療程前了解您的身體狀況，不能取代醫師診斷。填寫內容不會上傳，只會在您按下複製後由您自己傳送。頁面字型從 Google Fonts 載入，不包含您的填答內容。同意書版本 20261028。</footer>
+</div>
+
+<script>
+(function(){
+  const f=document.getElementById('f'),KEY='intake-draft-v3',CONSENT_VER='20261028',$=id=>document.getElementById(id);
+  const SCALES=[['sFatigue','疲累、沒精神'],['sSleep','睡不好'],['sSkin','皮膚狀況'],['sGut','腸胃不適'],['sStress','壓力、緊繃'],['sMain','您最在意的那件事']];
+
+  const sc=$('scales');
+  SCALES.forEach(([n,label])=>{
+    const fs=document.createElement('fieldset');fs.className='scale-row';fs.dataset.req=n;
+    fs.innerHTML='<legend></legend><div class="opts scale" data-type="radio"></div><div class="scale-ends"><span>0 沒困擾</span><span>10 非常困擾</span></div>';
+    fs.querySelector('legend').innerHTML=label+'<span class="req">必填</span>';
+    const box=fs.querySelector('.opts');box.dataset.name=n;box.dataset.items=Array.from({length:11},(_,i)=>i).join('|');
+    sc.append(fs);
+  });
+  document.querySelectorAll('.opts').forEach(box=>{
+    const n=box.dataset.name,t=box.dataset.type;
+    box.dataset.items.split('|').forEach((v,i)=>{
+      const l=document.createElement('label');l.className='opt';
+      const inp=document.createElement('input');inp.type=t;inp.name=n;inp.value=v;inp.id=n+'_'+i;
+      if(box.classList.contains('scale'))inp.setAttribute('aria-label',v+' 分');
+      const s=document.createElement('span');s.textContent=v;l.append(inp,s);box.append(l);
+    });
+  });
+  (function(){const box=f.querySelector('.opts[data-name="preg"]');const l=document.createElement('label');l.className='opt';
+    l.innerHTML='<input type="radio" name="preg" value="不適用" id="preg_na"><span>不適用（男性）</span>';box.append(l)})();
+
+  const vals=n=>[...f.querySelectorAll(`[name="${n}"]:checked`)].map(i=>i.value);
+  const one=n=>vals(n)[0]||'';
+  const txt=id=>$(id).value.trim();
+  const has=(n,v)=>vals(n).includes(v);
+  const mode=()=>$('mode_re').checked?'re':'new';
+  const isHidden=el=>!!el.closest('[hidden]');
+
+  function applyMode(){
+    const m=mode(),re=m==='re';
+    document.querySelectorAll('[data-mode]').forEach(el=>el.hidden=el.dataset.mode!==m);
+    $('h1').textContent=re?'療程後，跟我們說說您的變化':'先了解您的身體，再為您安排療程';
+    $('lead').textContent=re?'用和第一次一樣的分數，幫我們看看療程前後的差別。':'回答幾個簡單的問題，我們會依您的狀況安排營養針內容，也會給您日常飲食與作息的建議。';
+    $('meta').firstElementChild.textContent=re?'預估 2 分鐘':'預估 5 分鐘';
+    $('mainItemLabel').firstChild.nodeValue=re?'初診時寫的「最在意的那件事」是？':'您最在意的那件事是什麼？';
+    $('mainItemHint').textContent=re?'請寫和初診時同一件事，忘了的話寫大概即可。':'之後回診會請您用同一件事再打一次分數，方便比較。';
+    $('submitBtn').textContent=re?'送出回診紀錄':'看我的建議';
+    sync();
+  }
+  function sync(e){
+    document.querySelectorAll('.opts[data-none]').forEach(box=>{
+      const none=box.dataset.none,n=box.dataset.name;
+      if(e&&e.target.name===n){
+        const bs=[...box.querySelectorAll('input')];
+        if(e.target.value===none&&e.target.checked)bs.forEach(b=>{if(b.value!==none)b.checked=false});
+        else if(e.target.checked)bs.forEach(b=>{if(b.value===none)b.checked=false});
+      }
+    });
+    const male=one('sex')==='男',female=one('sex')==='女',m=mode();
+    const p=f.querySelector('[name="concern"][value="經期不順或更年期不適"]');
+    if(male)p.checked=false;p.closest('.opt').hidden=male;
+    const k=vals('concern').length;
+    f.querySelectorAll('[name="concern"]').forEach(i=>i.disabled=!i.checked&&k>=3);
+    document.querySelectorAll('[data-female]').forEach(el=>{
+      const modeOk=!el.dataset.mode||el.dataset.mode===m;
+      el.hidden=!modeOk||(m==='new'&&!female);
+    });
+    const na=$('preg_na');if(m==='new')na.checked=false;na.closest('.opt').hidden=m==='new';
+    $('allergyNoteQ').hidden=one('allergy')===''||one('allergy')==='沒有';
+    $('adverseNoteQ').hidden=!vals('adverse').some(v=>v!=='沒有');
+    $('betterNoteQ').hidden=!vals('better').some(v=>v==='有些地方變差了'||v==='其他');
+    $('changedNoteQ').hidden=one('changed')!=='有';
+  }
+
+  let storeOk=true;
+  function save(){if(!storeOk)return;try{const d={};new FormData(f).forEach((v,k)=>{(d[k]=d[k]||[]).push(v)});d.__mode=mode();localStorage.setItem(KEY,JSON.stringify(d))}catch(_){storeOk=false;$('storeWarn').hidden=false}}
+  function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');
+    if(d.__mode==='re')$('mode_re').checked=true;
+    Object.entries(d).forEach(([k,arr])=>{if(k==='__mode')return;f.querySelectorAll(`[name="${k}"]`).forEach(el=>{
+      if(el.type==='checkbox'||el.type==='radio')el.checked=arr.includes(el.value);else el.value=arr[0]||''})})}
+    catch(_){storeOk=false;$('storeWarn').hidden=false}}
+  document.querySelectorAll('[name="mode"]').forEach(r=>r.addEventListener('change',()=>{applyMode();save()}));
+  f.addEventListener('change',e=>{sync(e);save();e.target.closest('.q,.scale-row')?.classList.remove('bad')});
+  f.addEventListener('input',e=>{save();e.target.closest('.q')?.classList.remove('bad')});
+  load();
+  if(location.hash==='#revisit')$('mode_re').checked=true;
+  applyMode();
+
+  function validate(){
+    let first=null;
+    f.querySelectorAll('[data-req]').forEach(q=>{
+      if(isHidden(q))return;
+      const r=q.dataset.req;let ok;
+      if(r)ok=vals(r).length>0;
+      else{
+        const ins=[...q.querySelectorAll(':scope input[type=text],:scope input[type=tel]')].filter(i=>!isHidden(i));
+        ok=ins.every(i=>i.value.trim()!=='');
+        if(ok&&q.dataset.check==='year'){const y=+ins[0].value.trim();ok=y>=1920&&y<=new Date().getFullYear()-12}
+        if(ok&&q.dataset.check==='int')ok=/^\d{1,3}$/.test(ins[0].value.trim());
+      }
+      q.classList.toggle('bad',!ok);if(!ok&&!first)first=q;
+    });
+    return first;
+  }
+
+  // ===== 給團隊的內部參考 =====
+  const TYPE={'累但睡不著、容易緊繃':'A','睡不好（難睡或容易醒）':'A','腦袋不清楚、容易沒電':'B','整體抗老保養':'B','皮膚暗沉、敏感、長痘':'C','常感冒、容易過敏':'待評估','想讓膚色更亮':'美白','常熬夜或應酬喝酒':'D','體重卡關、瘦不下來':'代謝','腸胃不好、便秘脹氣':'腸胃','手腳麻、刺痛、常頭痛':'E','手腳冰冷':'F','掉髮、髮量變少':'落髮','經期不順或更年期不適':'荷爾蒙'};
+  function flags(){
+    const o=[],add=(c,s)=>{if(c)o.push(s)};
+    add(one('fever')==='有','近一週發燒感冒');
+    add(has('med','抗凝血藥或阿斯匹靈'),'抗凝血');
+    const bleed=['魚油','銀杏','薑黃'].filter(v=>has('supp',v));add(bleed.length,'保健品有'+bleed.join('/'));
+    add(has('med','帕金森氏症用藥'),'帕金森用藥（問藥名）');
+    add(one('g6pd')==='有','G6PD');add(one('g6pd')==='不確定','G6PD 未知待查');
+    add(one('sulfa')==='有','含硫藥物過敏');add(one('sulfa')==='不確定','含硫過敏未知');
+    add(has('supp','硒'),'已補硒');
+    add(has('disease','腎臟疾病或洗腎')||has('med','利尿劑'),'腎／利尿');
+    add(has('disease','腎結石'),'腎結石');
+    add(has('disease','心臟疾病'),'心臟');
+    add(has('disease','重症肌無力'),'重症肌無力');
+    add(has('disease','癲癇'),'癲癇');
+    add(has('disease','癌症治療中')||has('med','化療或標靶藥物'),'癌症治療中');
+    add(has('disease','曾經罹癌'),'曾罹癌');
+    add(has('disease','自體免疫疾病')||has('med','免疫抑制劑'),'自體免疫／免疫抑制');
+    add(has('med','降血糖藥或胰島素'),'降血糖藥');
+    add(has('supp','B 群'),'已吃B群');
+    const p=one('preg');add(p&&p!=='都不是'&&p!=='不適用',p);
+    add(one('surgery')==='有','兩週內手術');
+    add(one('allergy').startsWith('曾經嚴重'),'嚴重過敏史');
+    add(one('allergy').startsWith('有，輕微'),'輕微過敏');
+    add(has('iv','容易暈針或暈血'),'暈針');
+    add(has('iv','血管不好找'),'血管難找');
+    add(has('iv','打完曾經不舒服'),'點滴後曾不適');
+    add(one('period')==='量很多或血塊多','經血多（查鐵）');
+    add(one('smoke')==='有在抽','抽菸');
+    add(has('better','有些地方變差了'),'回報變差');
+    add(vals('adverse').some(v=>v!=='沒有'),'上次不適：'+vals('adverse').join('/'));
+    add(one('changed')==='有','近期有新變化');
+    return o;
+  }
+  const bmi=()=>{const h=+txt('height')/100,w=+txt('weight');return h>1&&w>20?(w/(h*h)).toFixed(1):''};
+  const scoreLine=()=>SCALES.map(([n,l])=>l.replace('您最在意的那件事','最在意')+' '+(one(n)||'—')).join('／');
+
+  // ===== 給客人的作息建議：只寫「怎麼做」，不寫效果；有慢性病或過敏時不給具體食物與飲水量 =====
+  function risk(){
+    const d=vals('disease').filter(v=>v!=='都沒有'),meds=vals('med').filter(v=>v!=='沒有吃藥');
+    return {
+      kidneyHeart:has('disease','腎臟疾病或洗腎')||has('disease','心臟疾病')||has('med','利尿劑'),
+      sugarMed:has('med','降血糖藥或胰島素')||has('disease','糖尿病'),
+      heart:has('disease','心臟疾病'),
+      allergy:one('allergy')!==''&&one('allergy')!=='沒有',
+      chronic:d.length>0||meds.length>0
+    };
+  }
+  function tips(){
+    const t=[],r=risk(),diet=!r.kidneyHeart&&!r.sugarMed;
+    const lateBed=['12 點到 1 點','1 點以後'].includes(one('bed'))||one('sleepH')==='不到 5 小時';
+    if(lateBed||has('sleepType','躺很久才睡著'))
+      t.push(['把上床時間往前挪到 12 點前','每週提早 15 分鐘就好。睡前一小時放下手機、把燈光調暗。']);
+    if(one('caffeine')==='一天 2 杯以上或下午也喝')
+      t.push(['下午 2 點後不喝咖啡和茶','下午想喝飲料時，改喝溫開水。']);
+    if(one('snack')==='一週 3 次以上'){
+      if(r.sugarMed)t.push(['三餐定時吃','有在控制血糖的話，不要突然改變吃東西的時間和份量，宵夜怎麼調整請先問您的醫師。']);
+      else t.push(['晚餐後就不再吃東西','晚上想吃東西時，先刷牙或喝杯溫水。']);
+    }
+    if(one('sugar')==='幾乎每天')
+      t.push(['含糖飲料換成無糖','先從一天少一杯開始，慢慢減。']);
+    if(one('alcohol')==='一週 2 次以上')
+      t.push(['喝酒一週不超過一次','有應酬時先吃東西再喝，喝完當天早點休息。']);
+    if(one('water')==='不到 1000 mL'&&!r.kidneyHeart)
+      t.push(['少量多次喝水','把水壺放在看得到的地方，起床、飯前各喝幾口。']);
+    if(['常便秘','兩三天一次'].includes(one('bowel'))&&diet&&!r.allergy)
+      t.push(['每餐都有一份青菜','再加上每天固定時間上廁所的習慣。']);
+    if(one('exercise')==='幾乎沒有'){
+      if(r.heart)t.push(['飯後散步 10 分鐘','走到還能說話、不喘的速度就好。運動強度請先問過您的醫師。']);
+      else if(r.chronic)t.push(['每天走路 15 到 20 分鐘','用自己舒服的速度。有慢性病的話，運動量請先問過您的醫師。']);
+      else t.push(['每天快走 20 分鐘','飯後散步也算。先求每天動，再慢慢加量。']);
+    }
+    if(one('eatout')==='幾乎都外食'&&diet)
+      t.push(['外食多點一份青菜','炸的換成滷的、烤的或蒸的。']);
+    if(one('smoke')==='有在抽')
+      t.push(['先從每天少抽幾根開始','想抽的時候先起來走一走。需要的話可以找戒菸門診幫忙。']);
+    if(+one('sStress')>=7)
+      t.push(['每天留 10 分鐘給自己','慢慢深呼吸、伸展或泡腳都可以。']);
+    const base=[['固定時間起床','假日也差不多時間起床。'],['每天到戶外走走','早上出門曬曬太陽、走一段路。'],['三餐定時','盡量每天差不多時間吃飯。']];
+    while(t.length<3)t.push(base.shift());
+    return t.slice(0,5);
+  }
+  function callout(){
+    const m=[],r=risk();
+    if(one('fever')==='有')m.push('您最近有發燒或感冒，我們會先和您確認身體狀況再安排施打時間。');
+    if(r.kidneyHeart)m.push('您有腎臟或心臟方面的狀況，喝水量和飲食請依照您的醫師或營養師的指示。');
+    else if(r.sugarMed)m.push('您有在控制血糖，飲食份量與時間的調整請依照您的醫師或營養師的指示。');
+    else if(r.chronic)m.push('您有正在追蹤的身體狀況，飲食與運動的調整請先配合您的醫師建議。');
+    if(one('allergy').startsWith('曾經嚴重'))m.push('您曾經嚴重過敏，施打前我們會再和您詳細確認。');
+    return m.join(' ');
+  }
+
+  function summaryNew(){
+    const L=[],c=vals('concern'),types=[...new Set(c.map(x=>TYPE[x]))].join('、'),b=bmi();
+    L.push('【初診健康問卷】'+new Date().toLocaleDateString('zh-TW'));
+    L.push(`稱呼：${txt('name')}｜${one('sex')}｜${txt('birth')} 年生`);
+    L.push(`聯絡：${txt('phone')}`);
+    L.push(`緊急聯絡人：${txt('ecName')} ${txt('ecPhone')}`);
+    L.push(`身高體重：${txt('height')||'—'} cm／${txt('weight')||'—'} kg${b?'（BMI '+b+'）':''}`);
+    L.push(`困擾：${c.join('、')}（${one('duration')||'未填'}）`);
+    L.push(`最在意：${txt('mainItem')}`);
+    L.push(`分數：${scoreLine()}`);
+    L.push(`近一週發燒感冒：${one('fever')}`);
+    L.push(`狀況：${vals('disease').join('、')}｜G6PD：${one('g6pd')}`);
+    L.push(`用藥：${vals('med').join('、')}${txt('medNote')?'（'+txt('medNote')+'）':''}`);
+    L.push(`保健品：${vals('supp').join('、')}${txt('suppNote')?'（'+txt('suppNote')+'）':''}`);
+    L.push(`過敏：${one('allergy')}${one('allergy')!=='沒有'&&txt('allergyNote')?'（'+txt('allergyNote')+'）':''}｜含硫藥物過敏：${one('sulfa')}`);
+    L.push(`點滴經驗：${vals('iv').join('、')}`);
+    if(one('sex')==='女')L.push(`懷孕哺乳：${one('preg')}｜月經：${one('period')||'—'}`);
+    L.push(`兩週內手術：${one('surgery')}`);
+    L.push(`睡眠：${one('bed')} 睡／${one('sleepH')||'—'}／${vals('sleepType').join('、')||'—'}`);
+    L.push(`飲食：${one('eatout')||'—'}／宵夜 ${one('snack')||'—'}／甜 ${one('sugar')||'—'}／咖啡茶 ${one('caffeine')||'—'}`);
+    L.push(`菸酒：酒 ${one('alcohol')||'—'}／菸 ${one('smoke')||'—'}`);
+    L.push(`水 ${one('water')||'—'}／排便 ${one('bowel')||'—'}／運動 ${one('exercise')||'—'}`);
+    L.push(`健檢：${one('report')||'—'}`);
+    if(txt('extra'))L.push(`補充：${txt('extra')}`);
+    L.push(`同意（版本 ${CONSENT_VER}）：資料使用 ${one('agree')||'—'}／去識別化案例 ${one('caseOk')||'未同意'}`);
+    const fl=flags();
+    L.push(`——團隊參考｜初判 ${types||'—'}（待報告確認）${fl.length?'｜注意 '+fl.join('、'):''}`);
+    return L.join('\n');
+  }
+  function summaryRe(){
+    const L=[];
+    L.push('【回診追蹤】'+new Date().toLocaleDateString('zh-TW'));
+    L.push(`稱呼：${txt('name')}｜${txt('phone')}｜第 ${txt('visitNo')} 次｜上次 ${txt('lastDate')||'—'}`);
+    L.push(`最在意：${txt('mainItem')}`);
+    L.push(`分數：${scoreLine()}`);
+    L.push(`變化：${vals('better').join('、')}${!isHidden($('betterNote'))&&txt('betterNote')?'（'+txt('betterNote')+'）':''}`);
+    L.push(`不適：${vals('adverse').join('、')}${!isHidden($('adverseNote'))&&txt('adverseNote')?'（'+txt('adverseNote')+'）':''}`);
+    L.push(`作息建議：${one('followed')||'—'}`);
+    L.push(`新變化：${one('changed')}${one('changed')==='有'?'（'+txt('changedNote')+'）':''}`);
+    L.push(`近一週發燒感冒：${one('fever')}｜懷孕哺乳：${one('preg')}｜兩週內手術：${one('surgery')}`);
+    if(txt('extra'))L.push(`補充：${txt('extra')}`);
+    L.push(`同意（版本 ${CONSENT_VER}）：繼續使用 ${one('reAgree')}`);
+    const fl=flags();
+    if(fl.length)L.push(`——團隊參考｜注意 ${fl.join('、')}`);
+    return L.join('\n');
+  }
+
+  const result=$('result'),err=$('errMsg');
+  function clearResult(){$('tips').replaceChildren();$('summary').textContent='';$('callout').textContent='';$('callout').hidden=true;$('copyMsg').textContent=''}
+  f.addEventListener('submit',e=>{
+    e.preventDefault();
+    const bad=validate();
+    if(bad){err.textContent='還有必填的題目沒回答或格式不對，已經用顏色標出來了。';err.hidden=false;bad.scrollIntoView({behavior:'smooth',block:'center'});return}
+    err.hidden=true;clearResult();
+    const re=mode()==='re',ol=$('tips');
+    $('resTitle').textContent=re?'謝謝您的回饋':'給您的日常建議';
+    $('resNote').textContent=re?'我們會把這次的分數和上次比較，再和您討論接下來的安排。':'以上是一般生活建議，不能取代您的醫師或營養師的個人建議。營養針內容我們看過您的回答後會再和您確認，實際療程由醫師評估後決定。';
+    ol.hidden=re;
+    if(!re)tips().forEach(([h,p],i)=>{const li=document.createElement('li');
+      li.innerHTML='<span class="n"></span><div><b></b><p></p></div>';
+      li.querySelector('.n').textContent=i+1;li.querySelector('b').textContent=h;li.querySelector('p').textContent=p;ol.append(li)});
+    const c=re?'':callout();$('callout').textContent=c;$('callout').hidden=!c;
+    $('summary').textContent=re?summaryRe():summaryNew();
+    f.hidden=true;result.hidden=false;
+    result.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('editBtn').addEventListener('click',()=>{result.hidden=true;f.hidden=false;f.scrollIntoView({block:'start'})});
+  $('copyBtn').addEventListener('click',()=>{
+    const s=$('summary'),msg=$('copyMsg');
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(s);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);msg.textContent='已幫您選取文字，請長按後選「複製」。'};
+    try{navigator.clipboard.writeText(s.textContent).then(()=>{msg.textContent='已複製，請打開 LINE 貼上傳給我們。'},fallback)}catch(_){fallback()}
+  });
+  $('clearBtn').addEventListener('click',()=>{
+    try{localStorage.removeItem(KEY)}catch(_){}
+    const m=mode();f.reset();$('mode_'+m).checked=true;
+    clearResult();f.querySelectorAll('.bad').forEach(q=>q.classList.remove('bad'));
+    result.hidden=true;f.hidden=false;applyMode();window.scrollTo({top:0});
+  });
+})();
+</script>
+</body>
+</html>
