@@ -124,7 +124,9 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
       <fieldset class="q" data-req="sex" data-mode="new"><legend>性別<span class="req">必填</span></legend>
         <div class="opts" data-name="sex" data-type="radio" data-items="女|男"></div></fieldset>
       <div class="grid2" data-mode="new">
-        <div class="q" data-req data-check="year"><label class="t" for="birth">出生年（西元）<span class="req">必填</span></label><input type="text" id="birth" name="birth" inputmode="numeric" placeholder="例：1985"></div>
+        <div class="q" data-req data-check="date"><label class="t" for="birth">出生年月日<span class="req">必填</span></label><input type="text" id="birth" name="birth" inputmode="numeric" placeholder="1985/03/12" autocomplete="bday">
+          <p class="hint" id="birthHint">請照這個格式填：<b>1985/03/12</b>（西元年/月/日）。用民國年也可以，例如 74/03/12。</p>
+          <p class="hint" id="birthEcho" aria-live="polite" hidden></p></div>
         <div class="q"><span class="t">身高／體重</span>
           <div class="grid2" style="gap:8px;grid-template-columns:1fr 1fr">
             <input type="text" id="height" name="height" inputmode="decimal" placeholder="身高 cm" aria-label="身高">
@@ -377,8 +379,11 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     catch(_){storeOk=false;$('storeWarn').hidden=false}}
   document.querySelectorAll('[name="mode"]').forEach(r=>r.addEventListener('change',()=>{applyMode();save()}));
   f.addEventListener('change',e=>{sync(e);save();e.target.closest('.q,.scale-row')?.classList.remove('bad')});
+  function echoBirth(){const el=$('birthEcho'),d=birthDate();el.hidden=!txt('birth');
+    if(d){const [y,m,dd]=d.split('-');el.textContent=`＝ 西元 ${y} 年 ${+m} 月 ${+dd} 日，請確認是否正確`;}else el.textContent='格式看不懂，請照 1985/03/12 這樣填';}
+  $('birth').addEventListener('input',echoBirth);
   f.addEventListener('input',e=>{save();e.target.closest('.q')?.classList.remove('bad')});
-  load();
+  load();echoBirth();
   if(location.hash==='#revisit')$('mode_re').checked=true;
   applyMode();
 
@@ -391,7 +396,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
       else{
         const ins=[...q.querySelectorAll(':scope input[type=text],:scope input[type=tel]')].filter(i=>!isHidden(i));
         ok=ins.every(i=>i.value.trim()!=='');
-        if(ok&&q.dataset.check==='year'){const y=+ins[0].value.trim();ok=y>=1920&&y<=new Date().getFullYear()-12}
+        if(ok&&q.dataset.check==='date')ok=!!birthDate();
         if(ok&&q.dataset.check==='int')ok=/^\d{1,3}$/.test(ins[0].value.trim());
       }
       q.classList.toggle('bad',!ok);if(!ok&&!first)first=q;
@@ -433,6 +438,17 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
     add(vals('adverse').some(v=>v!=='沒有'),'上次不適：'+vals('adverse').join('/'));
     add(one('changed')==='有','近期有新變化');
     return o;
+  }
+  // 出生年月日：接受 1985/3/12、1985-03-12、1985.3.12、19850312、民國 74/3/12；統一成 1985-03-12
+  function birthDate(){
+    const v=txt('birth').replace(/^(民國|西元)/,'').replace(/[年月\.\-－／\s]/g,'/').replace(/日/g,'').replace(/\/+/g,'/').replace(/^\/|\/$/g,'');
+    let m=v.match(/^(\d{2,4})\/(\d{1,2})\/(\d{1,2})$/)||v.match(/^(\d{4})(\d{2})(\d{2})$/)||v.match(/^(\d{2,3})(\d{2})(\d{2})$/);
+    if(!m)return '';
+    let y=+m[1],mo=+m[2],d=+m[3];if(y<200)y+=1911;
+    const dt=new Date(y,mo-1,d),now=new Date();
+    if(dt.getFullYear()!==y||dt.getMonth()!==mo-1||dt.getDate()!==d)return '';
+    if(y<1920||y>now.getFullYear()-12)return '';
+    return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   }
   const bmi=()=>{const h=+txt('height')/100,w=+txt('weight');return h>1&&w>20?(w/(h*h)).toFixed(1):''};
   const scoreLine=()=>SCALES.map(([n,l])=>l.replace('您最在意的那件事','最在意')+' '+(one(n)||'—')).join('／');
@@ -495,7 +511,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
   function summaryNew(){
     const L=[],c=vals('concern'),types=[...new Set(c.map(x=>TYPE[x]))].join('、'),b=bmi();
     L.push('【初診健康問卷】'+new Date().toLocaleDateString('zh-TW'));
-    L.push(`稱呼：${txt('name')}｜${one('sex')}｜${txt('birth')} 年生`);
+    L.push(`稱呼：${txt('name')}｜${one('sex')}｜生日 ${birthDate()}`);
     L.push(`聯絡：${txt('phone')}`);
     L.push(`緊急聯絡人：${txt('ecName')} ${txt('ecPhone')}`);
     L.push(`身高體重：${txt('height')||'—'} cm／${txt('weight')||'—'} kg${b?'（BMI '+b+'）':''}`);
@@ -548,7 +564,7 @@ footer{font-size:12px;color:var(--muted);line-height:1.7}
       '變化':j(vals('better')),'變化說明':isHidden($('betterNote'))?'':txt('betterNote'),'不適':j(vals('adverse')),'不適說明':isHidden($('adverseNote'))?'':txt('adverseNote'),
       '作息建議':one('followed'),'新變化':one('changed'),'新變化說明':one('changed')==='有'?txt('changedNote'):'','近一週發燒感冒':one('fever'),'懷孕哺乳':one('preg'),'兩週內手術':one('surgery'),
       '補充':txt('extra'),'同意繼續使用':one('reAgree'),'注意事項':j(flags())};
-    return {_mode:'new','同意版本':CONSENT_VER,'稱呼':txt('name'),'手機/LINE':txt('phone'),'性別':one('sex'),'出生年':txt('birth'),'身高':txt('height'),'體重':txt('weight'),'BMI':bmi(),
+    return {_mode:'new','同意版本':CONSENT_VER,'稱呼':txt('name'),'手機/LINE':txt('phone'),'性別':one('sex'),'出生年':birthDate(),'身高':txt('height'),'體重':txt('weight'),'BMI':bmi(),
       '緊急聯絡人':txt('ecName'),'緊急聯絡電話':txt('ecPhone'),'困擾':j(vals('concern')),'困擾多久':one('duration'),'最在意':txt('mainItem'),
       '疲累':one('sFatigue'),'睡不好':one('sSleep'),'皮膚':one('sSkin'),'腸胃':one('sGut'),'壓力':one('sStress'),'最在意分數':one('sMain'),
       '近一週發燒感冒':one('fever'),'慢性病':j(vals('disease')),'G6PD':one('g6pd'),'用藥':j(vals('med')),'藥名':txt('medNote'),'保健品':j(vals('supp')),'保健品說明':txt('suppNote'),
